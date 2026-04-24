@@ -6,7 +6,7 @@ Implement a **screen-space outline render effect** as a URP `ScriptableRendererF
 
 When complete, opaque objects in the scene should receive a configurable outline driven by depth and/or surface normal discontinuities between neighbouring pixels — no per-object shaders or mesh modifications required.
 
-**Time expectation: 2–3 hours.** Do not over-engineer; a working solution with clean code beats a half-finished ambitious one.
+**Time expectation: ~2 hours.** Do not over-engineer; a working solution with clean code beats a half-finished ambitious one.
 
 ---
 
