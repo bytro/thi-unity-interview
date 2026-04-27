@@ -49,11 +49,11 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.3.10f1/Unity.app/Contents/Resources/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets/InterviewTask/Scripts/OutlineFeature.cs" />
-    <Compile Include="Assets/InterviewTask/Scripts/OutlinePass.cs" />
+    <Compile Include="Assets/InterviewTask-Graphics/Scripts/OutlineFeature.cs" />
+    <Compile Include="Assets/InterviewTask-Graphics/Scripts/OutlinePass.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets/InterviewTask/Shaders/Outline.shader" />
+    <None Include="Assets/InterviewTask-Graphics/Shaders/Outline.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
