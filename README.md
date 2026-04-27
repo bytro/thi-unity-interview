@@ -14,7 +14,7 @@ The task and all instructions are in [Assets/InterviewTask/TASK.md](Assets/Inter
 
 ## Setup
 
-1. Open the project in Unity (2022.3 LTS or newer recommended)
+1. Open the project in Unity - please use Unity 6.3 LTS if possible to avoid issues due to version differences 
 2. Open `Assets/Scenes/SampleScene.unity`
 3. Use the helper menu **Tools → Interview → Setup Scene** to populate the scene
 4. Follow the instructions in [TASK.md](Assets/InterviewTask/TASK.md)
