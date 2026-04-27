@@ -32,8 +32,7 @@ When complete, opaque objects in the scene should receive a configurable outline
 ## Getting Started
 
 1. Open `Assets/Scenes/SampleScene.unity`
-2. Populate the scene using the helper menu: **Tools → Interview → Setup Scene**
-   This spawns a mix of primitives at varying depths so edge detection is easy to verify.
+2. In this scene you will find a collection of primitives at varying depths, so edge detection will be easy to verify.
 3. Open `Assets/Settings/PC_Renderer.asset` in the Inspector and add your `OutlineFeature` once it compiles.
 4. Fill in all `// TODO` sections in:
    - `Assets/InterviewTask/Scripts/OutlineFeature.cs`
