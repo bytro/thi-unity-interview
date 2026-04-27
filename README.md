@@ -8,7 +8,7 @@ Please fork this repository and invite the necessary people to the forked repo (
 
 ## Interview Task
 
-The task and all instructions are in [Assets/InterviewTask/TASK.md](Assets/InterviewTask/TASK.md).
+The task and all instructions are in [Assets/InterviewTask-Graphics-Graphics/TASK.md](Assets/InterviewTask-Graphics/TASK.md).
 
 **Time expectation: ~2 hours.**
 
@@ -16,4 +16,4 @@ The task and all instructions are in [Assets/InterviewTask/TASK.md](Assets/Inter
 
 1. Open the project in Unity - please use Unity 6.3 LTS if possible to avoid issues due to version differences 
 2. Open `Assets/Scenes/SampleScene.unity`, the scene contains primitives at varying depths for usage in the Task.
-3. Follow the instructions in [TASK.md](Assets/InterviewTask/TASK.md)
+3. Follow the instructions in [TASK.md](Assets/InterviewTask-Graphics/TASK.md)

@@ -35,9 +35,9 @@ When complete, opaque objects in the scene should receive a configurable outline
 2. In this scene you will find a collection of primitives at varying depths, so edge detection will be easy to verify.
 3. Open `Assets/Settings/PC_Renderer.asset` in the Inspector and add your `OutlineFeature` once it compiles.
 4. Fill in all `// TODO` sections in:
-   - `Assets/InterviewTask/Scripts/OutlineFeature.cs`
-   - `Assets/InterviewTask/Scripts/OutlinePass.cs`
-   - `Assets/InterviewTask/Shaders/Outline.shader`
+   - `Assets/InterviewTask-Graphics/Scripts/OutlineFeature.cs`
+   - `Assets/InterviewTask-Graphics/Scripts/OutlinePass.cs`
+   - `Assets/InterviewTask-Graphics/Shaders/Outline.shader`
 
 ---
 
