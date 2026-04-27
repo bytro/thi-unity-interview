@@ -2,6 +2,10 @@
 
 This is a Unity project used as part of a technical interview process at Stillfront/THI. It provides a pre-configured URP environment and a self-contained coding task for candidates.
 
+## Workflow
+
+Please fork this repository and invite the necessary people to the forked repo (or make it public). 
+
 ## Interview Task
 
 The task and all instructions are in [Assets/InterviewTask/TASK.md](Assets/InterviewTask/TASK.md).
