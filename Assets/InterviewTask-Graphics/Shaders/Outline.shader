@@ -55,21 +55,75 @@ Shader "Interview/OutlineEffect"
                 return SAMPLE_TEXTURE2D_X(_CameraNormalsTexture, sampler_CameraNormalsTexture, uv).rgb;
             }
 
-            // TODO: Implement edge detection.
-            //
+            // Z buffer to linear depth
+            //   taken from UnityCG.cginc
+            //   makes setting the threshold a bit more convenient
+            //   also adds a little overhead, so a similar calculation
+            // should probably be done in OutlineFeatures.cs
+            float LinearEyeDepth( float z )
+            {
+                return 1.0 / (_ZBufferParams.z * z + _ZBufferParams.w);
+            }
+
             // A Roberts cross on depth is a solid starting point:
             //   sample the four diagonal neighbours (±offset in x and y),
             //   compute two diagonal differences, combine their magnitudes.
             //
-            // Return 1.0 where an edge is detected, 0.0 elsewhere.
+            // It might make sense to use a different kernel like Sobel or
+            // Sharr to get better results. But this would also increase the
+            // amount of texture lookups.
+            // https://en.wikipedia.org/wiki/Sobel_operator
+            //
+            // Returns 1.0 where an edge is detected, 0.0 elsewhere.
             //
             // Parameters:
             //   uv        - centre UV of the current pixel
             //   texelSize - size of one pixel in UV space (1 / resolution)
             float DetectEdge(float2 uv, float2 texelSize)
             {
-                // TODO
-                return 0.0;
+                // convolution with roberts kernel (omitted 0 multiplications)
+                // gx = 1  0  gy=  0 1
+                //      0 -1      -1 0
+                // original version with non-linear values
+                // float gx = SampleDepth(uv) - SampleDepth(uv + (float2(1,1) * texelSize));
+                // float gy = SampleDepth(uv + (float2(1,0) * texelSize)) - SampleDepth(uv + (float2(0,1) * texelSize));
+                // linear version
+                float gx = LinearEyeDepth(SampleDepth(uv)) - LinearEyeDepth(SampleDepth(uv + (float2(1,1) * texelSize)));
+                float gy = LinearEyeDepth(SampleDepth(uv + (float2(1,0) * texelSize))) - LinearEyeDepth(SampleDepth(uv + (float2(0,1) * texelSize)));
+
+                 // get gradient via Pythagoras
+                float g = sqrt(gx * gx + gy * gy);
+
+                // use threshold to determine if we have an edge or not
+                // as an alternative smoothstep(_DepthThreshold - .2, _DepthThreshold + .2, g) can be used
+                return step(_DepthThreshold, g);
+            }
+
+            // A Roberts cross on normals
+            // Returns 1.0 where an edge is detected, 0.0 elsewhere.
+            //
+            // Parameters:
+            //   uv        - centre UV of the current pixel
+            //   texelSize - size of one pixel in UV space (1 / resolution)
+            float DetectEdgeNormals(float2 uv, float2 texelSize)
+            {
+                // the normal of the current pixel
+                float3 cn = SampleNormal(uv);
+
+                // convolution with roberts kernel (omitted 0 multiplications)
+                // gx = 1  0  gy=  0 1
+                //      0 -1      -1 0
+                float gx =
+                    1 // dot(cn, cn) = 1
+                    - dot(cn, SampleNormal(uv + (float2(1,1) * texelSize)));
+                float gy =
+                    dot(cn, SampleNormal(uv + (float2(1,0) * texelSize)))
+                    - dot(cn, SampleNormal(uv + (float2(0,1) * texelSize)));
+
+                float g = sqrt(gx * gx + gy * gy);
+
+                // as an alternative smoothstep(_NormalThreshold - .2, _NormalThreshold + .2, g) can be used
+                return step(_NormalThreshold, g);
             }
 
             half4 Frag(Varyings input) : SV_Target
@@ -79,8 +133,20 @@ Shader "Interview/OutlineEffect"
                 // Sample the original scene colour.
                 half4 sceneColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
 
-                // TODO: compute texelSize from _ScreenParams (xy = width, height in pixels)
-                // TODO: call DetectEdge and use the result to lerp between sceneColor and _OutlineColor
+                // compute texelSize from _ScreenParams (xy = width, height in pixels)
+                float2 texelSize = _Thickness / float2(_ScreenParams.x, _ScreenParams.y);
+
+                // get edge from depth
+                float depthEdge = DetectEdge(uv, texelSize);
+                // get edge from normals
+                float normalEdge = DetectEdgeNormals(uv, texelSize);
+
+                // combining both results by using depth outlines where normal outlines don't work
+                // e.g. if two flat surfaces cover up each other
+                float edge = normalEdge + (depthEdge * (1 - normalEdge));
+
+                // lerping between sceneColor and _OutlineColor
+                sceneColor = lerp(sceneColor, _OutlineColor, edge);
 
                 return sceneColor;
             }
