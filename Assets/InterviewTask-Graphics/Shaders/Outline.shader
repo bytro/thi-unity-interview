@@ -82,6 +82,7 @@ Shader "Interview/OutlineEffect"
                 // TODO: compute texelSize from _ScreenParams (xy = width, height in pixels)
                 // TODO: call DetectEdge and use the result to lerp between sceneColor and _OutlineColor
 
+                return half4(1,0,0,1);
                 return sceneColor;
             }
             ENDHLSL

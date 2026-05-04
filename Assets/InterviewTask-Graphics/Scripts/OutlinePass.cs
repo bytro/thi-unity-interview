@@ -15,6 +15,9 @@ public class OutlinePass : ScriptableRenderPass
     private Material _material;
     private OutlineFeature.Settings _settings;
 
+    ProfilingSampler m_blitProfilingSampler = new ProfilingSampler("OutlineBlit");
+    RTHandle tempRT = null;
+
     public OutlinePass(OutlineFeature.Settings settings)
     {
         _settings = settings;
@@ -22,8 +25,17 @@ public class OutlinePass : ScriptableRenderPass
         // Tell URP to prepare _CameraDepthTexture and _CameraNormalsTexture before this pass runs.
         ConfigureInput(ScriptableRenderPassInput.Depth | ScriptableRenderPassInput.Normal);
 
-        // TODO: load the Outline shader from Resources or via Shader.Find and create the material.
-        //       Prefer loading from a known path so this works in builds, not just the Editor.
+        // loading the Outline shader via Shader.Find and creating the material.
+        // shader is always include in builds
+        var shader = Shader.Find("Interview/OutlineEffect");
+        if (shader != null)
+        {
+            _material = CoreUtils.CreateEngineMaterial(shader);
+        }
+        else
+        {
+            Debug.LogError("Could not find Outline shader");
+        }
     }
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -34,23 +46,46 @@ public class OutlinePass : ScriptableRenderPass
         var cmd = CommandBufferPool.Get("Outline Effect");
 
         // Push current settings to the shader each frame so Inspector tweaks are live.
-        _material.SetColor(OutlineColorId,    _settings.outlineColor);
-        _material.SetFloat(ThicknessId,       _settings.thickness);
-        _material.SetFloat(DepthThresholdId,  _settings.depthThreshold);
+        _material.SetColor(OutlineColorId, _settings.outlineColor);
+        _material.SetFloat(ThicknessId, _settings.thickness);
+        _material.SetFloat(DepthThresholdId, _settings.depthThreshold);
         _material.SetFloat(NormalThresholdId, _settings.normalThreshold);
 
-        // TODO: obtain the camera color target handle from renderingData.cameraData.renderer
-        // TODO: blit the color target through _material back to the same target
-        //       Hint: Blitter.BlitCameraTexture(cmd, source, destination, _material, 0)
-        //       Note: you may need a temporary RTHandle as an intermediate buffer to avoid
-        //             reading and writing the same texture simultaneously.
+        // get a handle to the cameraColorTarget
+        var colorTarget = renderingData.cameraData.renderer.cameraColorTargetHandle;
 
+        // blitting the color target through _material back to the same target
+        // using a temporary RTHandle
+        using (new ProfilingScope(cmd, m_blitProfilingSampler))
+        {
+            Blitter.BlitCameraTexture(cmd, colorTarget, tempRT);
+            Blitter.BlitCameraTexture(cmd, tempRT, colorTarget, _material, 0);
+        }
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
     }
 
+    public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
+    {
+        // allocating a temporary RTHandle if needed
+        var colorTarget = renderingData.cameraData.renderer.cameraColorTargetHandle;
+        RenderingUtils.ReAllocateIfNeeded(ref tempRT, colorTarget.rt.descriptor);
+    }
+
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        // TODO: release any temporary RTHandles allocated during Execute
+        // releasing temporary RTHandle
+        if (tempRT != null)
+        {
+            tempRT.Release();
+        }
+    }
+
+    public void Cleanup()
+    {
+        // allowing to get rid of the created material
+        // the whole material creation and cleanup could
+        // probably move over to the OutlineFeature
+        CoreUtils.Destroy(_material);
     }
 }

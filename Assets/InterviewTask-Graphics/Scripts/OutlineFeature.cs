@@ -46,4 +46,9 @@ public class OutlineFeature : ScriptableRendererFeature
         if (renderingData.cameraData.cameraType == CameraType.Game)
             renderer.EnqueuePass(_pass);
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        _pass.Cleanup();
+    }
 }
