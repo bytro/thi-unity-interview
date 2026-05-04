@@ -69,6 +69,11 @@ Shader "Interview/OutlineEffect"
             //   sample the four diagonal neighbours (±offset in x and y),
             //   compute two diagonal differences, combine their magnitudes.
             //
+            // It might make sense to use a different kernel like Sobel or
+            // Sharr to get better results. But this would also increase the
+            // amount of texture lookups.
+            // https://en.wikipedia.org/wiki/Sobel_operator
+            //
             // Returns 1.0 where an edge is detected, 0.0 elsewhere.
             //
             // Parameters:
@@ -90,6 +95,7 @@ Shader "Interview/OutlineEffect"
                 float g = sqrt(gx * gx + gy * gy);
 
                 // use threshold to determine if we have an edge or not
+                // as an alternative smoothstep(_DepthThreshold - .2, _DepthThreshold + .2, g) can be used
                 return step(_DepthThreshold, g);
             }
 
@@ -116,6 +122,7 @@ Shader "Interview/OutlineEffect"
 
                 float g = sqrt(gx * gx + gy * gy);
 
+                // as an alternative smoothstep(_NormalThreshold - .2, _NormalThreshold + .2, g) can be used
                 return step(_NormalThreshold, g);
             }
 
