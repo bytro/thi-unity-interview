@@ -127,7 +127,8 @@ Shader "Interview/OutlineEffect"
                 half4 sceneColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
 
                 // compute texelSize from _ScreenParams (xy = width, height in pixels)
-                float2 texelSize = 1 / float2(_ScreenParams.x, _ScreenParams.y);
+                float2 texelSize = _Thickness / float2(_ScreenParams.x, _ScreenParams.y);
+
                 // get edge from depth
                 float depthEdge = DetectEdge(uv, texelSize);
                 // get edge from normals
