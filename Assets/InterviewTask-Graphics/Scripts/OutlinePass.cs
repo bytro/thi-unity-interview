@@ -74,9 +74,18 @@ public class OutlinePass : ScriptableRenderPass
 
     public override void OnCameraCleanup(CommandBuffer cmd)
     {
-        // releasing temporary RTHandle
+        #if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            // break here if we are in not in playmode because
+            // we want to look at the outline without hitting play everytime
+            return;
+        }
+        #endif
+
         if (tempRT != null)
         {
+            // releasing temporary RTHandle
             tempRT.Release();
         }
     }

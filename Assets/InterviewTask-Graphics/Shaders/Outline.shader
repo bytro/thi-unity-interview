@@ -68,8 +68,17 @@ Shader "Interview/OutlineEffect"
             //   texelSize - size of one pixel in UV space (1 / resolution)
             float DetectEdge(float2 uv, float2 texelSize)
             {
-                // TODO
-                return 0.0;
+                // convolution with roberts kernel (omitted 0 multiplications)
+                // gx = 1  0  gy=  0 1
+                //      0 -1      -1 0
+                float gx = SampleDepth(uv) - SampleDepth(uv + (float2(1,1) * texelSize));
+                float gy = SampleDepth(uv + (float2(1,0) * texelSize)) - SampleDepth(uv + (float2(0,1) * texelSize));
+
+                 // get gradient via Pythagoras
+                float g = sqrt(gx * gx + gy * gy);
+
+                // use threshold to determine if we have an edge or not
+                return step(_DepthThreshold, g);
             }
 
             half4 Frag(Varyings input) : SV_Target
