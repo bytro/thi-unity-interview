@@ -65,13 +65,11 @@ Shader "Interview/OutlineEffect"
                 return 1.0 / (_ZBufferParams.z * z + _ZBufferParams.w);
             }
 
-            // TODO: Implement edge detection.
-            //
             // A Roberts cross on depth is a solid starting point:
             //   sample the four diagonal neighbours (±offset in x and y),
             //   compute two diagonal differences, combine their magnitudes.
             //
-            // Return 1.0 where an edge is detected, 0.0 elsewhere.
+            // Returns 1.0 where an edge is detected, 0.0 elsewhere.
             //
             // Parameters:
             //   uv        - centre UV of the current pixel
@@ -95,6 +93,32 @@ Shader "Interview/OutlineEffect"
                 return step(_DepthThreshold, g);
             }
 
+            // A Roberts cross on normals
+            // Returns 1.0 where an edge is detected, 0.0 elsewhere.
+            //
+            // Parameters:
+            //   uv        - centre UV of the current pixel
+            //   texelSize - size of one pixel in UV space (1 / resolution)
+            float DetectEdgeNormals(float2 uv, float2 texelSize)
+            {
+                // the normal of the current pixel
+                float3 cn = SampleNormal(uv);
+
+                // convolution with roberts kernel (omitted 0 multiplications)
+                // gx = 1  0  gy=  0 1
+                //      0 -1      -1 0
+                float gx =
+                    1 // dot(cn, cn) = 1
+                    - dot(cn, SampleNormal(uv + (float2(1,1) * texelSize)));
+                float gy =
+                    dot(cn, SampleNormal(uv + (float2(1,0) * texelSize)))
+                    - dot(cn, SampleNormal(uv + (float2(0,1) * texelSize)));
+
+                float g = sqrt(gx * gx + gy * gy);
+
+                return step(_NormalThreshold, g);
+            }
+
             half4 Frag(Varyings input) : SV_Target
             {
                 float2 uv = input.texcoord;
@@ -105,7 +129,14 @@ Shader "Interview/OutlineEffect"
                 // compute texelSize from _ScreenParams (xy = width, height in pixels)
                 float2 texelSize = 1 / float2(_ScreenParams.x, _ScreenParams.y);
                 // get edge from depth
-                float edge = DetectEdge(uv, texelSize);
+                float depthEdge = DetectEdge(uv, texelSize);
+                // get edge from normals
+                float normalEdge = DetectEdgeNormals(uv, texelSize);
+
+                // combining both results by using depth outlines where normal outlines don't work
+                // e.g. if two flat surfaces cover up each other
+                float edge = normalEdge + (depthEdge * (1 - normalEdge));
+
                 // lerping between sceneColor and _OutlineColor
                 sceneColor = lerp(sceneColor, _OutlineColor, edge);
 
