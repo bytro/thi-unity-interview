@@ -55,6 +55,16 @@ Shader "Interview/OutlineEffect"
                 return SAMPLE_TEXTURE2D_X(_CameraNormalsTexture, sampler_CameraNormalsTexture, uv).rgb;
             }
 
+            // Z buffer to linear depth
+            //   taken from UnityCG.cginc
+            //   makes setting the threshold a bit more convenient
+            //   also adds a little overhead, so a similar calculation
+            // should probably be done in OutlineFeatures.cs
+            float LinearEyeDepth( float z )
+            {
+                return 1.0 / (_ZBufferParams.z * z + _ZBufferParams.w);
+            }
+
             // TODO: Implement edge detection.
             //
             // A Roberts cross on depth is a solid starting point:
@@ -71,8 +81,12 @@ Shader "Interview/OutlineEffect"
                 // convolution with roberts kernel (omitted 0 multiplications)
                 // gx = 1  0  gy=  0 1
                 //      0 -1      -1 0
-                float gx = SampleDepth(uv) - SampleDepth(uv + (float2(1,1) * texelSize));
-                float gy = SampleDepth(uv + (float2(1,0) * texelSize)) - SampleDepth(uv + (float2(0,1) * texelSize));
+                // original version with non-linear values
+                // float gx = SampleDepth(uv) - SampleDepth(uv + (float2(1,1) * texelSize));
+                // float gy = SampleDepth(uv + (float2(1,0) * texelSize)) - SampleDepth(uv + (float2(0,1) * texelSize));
+                // linear version
+                float gx = LinearEyeDepth(SampleDepth(uv)) - LinearEyeDepth(SampleDepth(uv + (float2(1,1) * texelSize)));
+                float gy = LinearEyeDepth(SampleDepth(uv + (float2(1,0) * texelSize))) - LinearEyeDepth(SampleDepth(uv + (float2(0,1) * texelSize)));
 
                  // get gradient via Pythagoras
                 float g = sqrt(gx * gx + gy * gy);

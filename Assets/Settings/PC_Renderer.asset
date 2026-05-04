@@ -72,7 +72,7 @@ MonoBehaviour:
   settings:
     outlineColor: {r: 0, g: 0, b: 0, a: 1}
     thickness: 1
-    depthThreshold: 0.01
+    depthThreshold: 0.804
     normalThreshold: 0.4
     renderPassEvent: 550
 --- !u!114 &7833122117494664109
