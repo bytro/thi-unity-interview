@@ -26,8 +26,12 @@ public class OutlineFeature : ScriptableRendererFeature
 
     public override void Create()
     {
-        // TODO: instantiate OutlinePass, passing settings to it
-        // TODO: assign _pass.renderPassEvent from settings.renderPassEvent
+        // instantiate OutlinePass, passing settings to it
+        // assign _pass.renderPassEvent from settings.renderPassEvent
+        _pass = new OutlinePass(settings)
+        {
+            renderPassEvent = settings.renderPassEvent
+        };
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
@@ -37,6 +41,9 @@ public class OutlineFeature : ScriptableRendererFeature
             return;
 
         // TODO: configure any per-frame pass state that depends on renderingData
-        // TODO: enqueue _pass on the renderer
+
+        // enqueue _pass on the renderer
+        if (renderingData.cameraData.cameraType == CameraType.Game)
+            renderer.EnqueuePass(_pass);
     }
 }
