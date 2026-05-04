@@ -79,7 +79,8 @@ Shader "Interview/OutlineEffect"
                 // Sample the original scene colour.
                 half4 sceneColor = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
 
-                // TODO: compute texelSize from _ScreenParams (xy = width, height in pixels)
+                // compute texelSize from _ScreenParams (xy = width, height in pixels)
+                float2 texelSize = 1 / float2(_ScreenParams.x, _ScreenParams.y);
                 // TODO: call DetectEdge and use the result to lerp between sceneColor and _OutlineColor
 
                 return half4(1,0,0,1);
